@@ -1,22 +1,28 @@
 [project]
 name = "limd"
 version = "0.1.0"
-description = "Add your description here"
+description = "Toolkit for fine-tuning a CV and a LinkedIn profile"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "requests",
-    "python-dotenv",
-    "convert",
-    "pdf-service",
-    "llm-tools",
-    "docling>=2.91.0",
+    "jinja2",
+    "markdown",
+    "markdown-it-py",
+    "pymupdf4llm",
+    "pyyaml",
+    "weasyprint>=68,<69",
 ]
 
-[tool.uv]
-workspace = { members = ["src/convert", "src/pdf", "src/llm"] }
+[project.scripts]
+limd = "limd.cli:main"
 
-[tool.uv.sources]
-convert = { workspace = true }
-pdf-service = { workspace = true }
-llm-tools = { workspace = true }
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"limd" = ["prompts/*.md"]
+"limd.pdf" = ["templates/*"]

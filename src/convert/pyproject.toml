@@ -1,8 +1,0 @@
-[project]
-name = "convert"
-version = "0.1.0"
-description = "Document conversion service using PyMuPDF4LLM"
-dependencies = [
-    "pymupdf4llm",
-]
-requires-python = ">=3.12"

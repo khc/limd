@@ -1,57 +1,66 @@
 # limd
 
-Markdown-to-PDF CV toolkit with helpers for tailoring a CV to a job description.
+A toolkit for fine-tuning your CV and LinkedIn profile.
 
-You keep your CV as a Markdown file, and `limd` renders it to a styled PDF (WeasyPrint). Optional helpers convert PDFs back to Markdown, score a CV against a job posting with an LLM, and fetch your LinkedIn profile.
+- Keep your CV as Markdown and render it to a styled PDF.
+- Import your own LinkedIn profile from LinkedIn's data export, and other people's profiles from a "Save to PDF" file.
+- Tailor your master CV to a job description and score the match with the LLM of your choice (Claude Code, Codex CLI or Gemini CLI).
+
+Your personal data stays in two git-ignored folders, `profile/` and `applications/`, so the repo itself is safe to share. A fake sample lives in `examples/`.
 
 ## Requirements
 
 - Python 3.12+ and [uv](https://docs.astral.sh/uv/)
-- [Task](https://taskfile.dev/) (`brew install go-task`)
 - WeasyPrint system libraries (macOS: `brew install pango`)
-- Optional:
-  - [LM Studio](https://lmstudio.ai/) serving a model on `http://localhost:1234/v1`, for `llm:compact` and `llm_match.py`
-  - [Codex CLI](https://github.com/openai/codex) or Gemini CLI, for `cv:generate` and `cv:match`
-  - `pandoc`, for `pdf:pandoc`
+- For tailoring and matching: the `claude`, `codex` or `gemini` CLI, installed and signed in
 
-## Setup
+## Install
 
 ```bash
-task install        # uv sync
-task pdf:fonts      # download the open-licensed fonts (Inter, Playfair Display, Outfit)
-cp .env.example .env  # only needed for the LinkedIn fetch
+uv sync
+uv run limd fonts      # download the open-licensed fonts (Inter, Playfair Display, Outfit)
 ```
 
-## Bring your own data
+On macOS, WeasyPrint needs `DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib`; the Taskfile sets it for you (`task test`, `task limd -- ...`).
 
-Personal files are git-ignored and are not part of this repo. Create your own:
+## Try it with the example profile
 
-| Path | Purpose |
-|------|---------|
-| `assets/generic-cv.md` | Your CV source (see format below) |
-| `assets/images/photo.png` | Optional profile photo for the CV sidebar (or set `photo:` in the front matter) |
-| `assets/jobs/<slug>.txt` or `.md` | Job descriptions used by `cv:generate` / `cv:match` |
-| `agents.md`, `career.md`, `assets/generic-li.md`, `assets/about.md`, `assets/reference-cv.md` | Instructions and context read by the `cv:generate` / `cv:match` prompts |
+```bash
+uv run limd --root examples cv build --input profile/cv.md     # -> examples/dist/pdf/cv.pdf
+uv run limd --root examples tailor acme --backend claude       # -> examples/applications/acme/cv.md + report.md
+uv run limd --root examples match acme --backend claude        # -> examples/applications/acme/match.md
+```
+
+## Your data
+
+```
+profile/                  you (private)
+  cv.md                   master CV (required for tailoring)
+  linkedin.md  about.md  rules.md  strategy.md  reference-cv.md   optional context for the LLM
+  photo.png               optional CV photo (or `photo:` in the front matter)
+  people/<slug>.md|json   profiles imported from PDF
+applications/<company>/   one folder per application (private)
+  job.md                  the job description (job.txt also works)
+  cv.md  report.md        written by `limd tailor`
+  match.md                written by `limd match`
+dist/                     PDFs (dist/<company>/ for files inside applications/<company>/)
+```
+
+`profile/rules.md` is where your own rules live, for example "never invent metrics" or how strongly to word things. It is sent to the model with every tailoring request.
 
 ### CV format
 
 ```markdown
 ---
-photo: assets/images/photo.png   # optional
-phone: "+00 000 000 000"
 email: you@example.com
 linkedin: www.linkedin.com/in/you
-website: example.com
-github: github.com/you
 location: City, Country
+photo: profile/photo.png   # optional
 ---
 
 # Your Name
 
-Headline | Specialty | Specialty
-
-## Professional Summary
-...
+Headline | Specialty
 
 ## Experience
 
@@ -61,46 +70,59 @@ Jan 2020 – Present {#period}
 City, Country {#place}
 
 - Bullet
-- Bullet
 
 ## Education {#sidebar}
-...
 ```
 
-- Front matter fields feed the sidebar contact block.
-- `{#period}` moves the date into the employer heading, and `{#place}` lines are dropped from the PDF.
-- Any `##` section tagged `{#sidebar}` is rendered in the left sidebar.
+`{#period}` moves the date into the employer heading, `{#place}` lines are dropped from the PDF, and `{#sidebar}` sections render in the left column. See `examples/profile/cv.md`.
 
-## Usage
+## LinkedIn import
 
-| Task | What it does |
-|------|--------------|
-| `task pdf:cv input=assets/generic-cv.md` | Render a Markdown file to `dist/pdf/<name>.pdf` |
-| `task pdf:pandoc input=in.md output=out.pdf` | Alternative render via Pandoc and `src/pdf/styles/prolab.css` |
-| `task pdf:fonts` | Download open-licensed fonts into `assets/fonts/` |
-| `task convert:md -- --input cv.pdf` | Convert PDF(s) to Markdown (`--engine pymupdf\|unstructured`) |
-| `task cv:generate -- --job <slug>` | Tailor the CV to `assets/jobs/<slug>.*` with Codex; writes `assets/generated/<slug>-cv.md` and `<slug>-report.md` |
-| `task cv:match -- --job <slug> [--agent gemini\|codex]` | Score the generated CV against the job description |
-| `task llm:compact -- --input file.md` | Compact a Markdown file to plain text with a local LLM |
-| `task profile -- --profile <id>` | Fetch a LinkedIn profile as JSON into `li/` (needs `.env` credentials) |
+LinkedIn offers no public API for reading profiles, and automating the site breaks its Terms of Service, so `limd` never scrapes it. Two supported routes:
 
-## Layout
+- **Your own profile:** LinkedIn → Settings → Data privacy → *Get a copy of your data*, select the profile data, download the ZIP, then:
 
-```
-src/pdf/       Markdown -> PDF builder, Jinja template, CSS
-src/convert/   PDF -> Markdown
-src/llm/       Local-LLM helpers (LM Studio)
-scripts/       Codex / Gemini wrappers for tailoring and matching
-format.md      Typography spec used by the CV stylesheet
-```
+  ```bash
+  uv run limd import linkedin-export Basic_LinkedInDataExport.zip     # -> profile/linkedin.json + linkedin.md
+  ```
 
-## Tests
+  The importer reads `Profile.csv`, `Positions.csv`, `Education.csv` and `Skills.csv` from anywhere in the ZIP and skips any that are missing. LinkedIn does not document the file layout, so if your archive looks different, please open an issue.
+- **Someone else's profile:** open it in your browser, choose *More → Save to PDF*, then:
+
+  ```bash
+  uv run limd import pdf Profile.pdf --name jane-doe     # -> profile/people/jane-doe.md + .json
+  ```
+
+Existing output is never overwritten unless you pass `--force`.
+
+## Commands
+
+| Command | What it does |
+|---|---|
+| `limd import linkedin-export <zip>` | Import your own profile from LinkedIn's data export |
+| `limd import pdf <file> --name <slug>` | Import a LinkedIn profile saved as PDF |
+| `limd cv build --input <file>` | Render a Markdown CV to PDF |
+| `limd tailor <company> [--backend] [--model] [--force]` | Tailor `profile/cv.md` to `applications/<company>/job.md` |
+| `limd match <company> [--backend] [--model] [--force]` | Score `applications/<company>/cv.md` against the job |
+| `limd compact --input <file>` | Compact a Markdown file with an LLM |
+| `limd convert --input <pdf>` | Convert PDF(s) to Markdown |
+| `limd fonts` | Download the PDF fonts |
+
+Use `--root <dir>` (or `LIMD_ROOT`) to point `limd` at a different data folder.
+
+## Backends
+
+`--backend claude` (default), `codex` or `gemini`. Each takes a prompt and returns text; `src/limd/llm/backends.py` is about 60 lines if you want to add another.
+
+## Development
 
 ```bash
-DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib uv run python -m unittest discover tests
+task test      # DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib uv run python -m unittest discover tests
 ```
+
+PDF rendering only loads fonts from `assets/fonts/`, images from `profile/`, and files from `src/limd/pdf/templates/`; remote URLs and other paths are blocked.
 
 ## Known limitations
 
-- The Motiva Sans font used by `cv.css` is commercial and not included. Without it the PDF falls back to a generic sans-serif. Add your own files under `assets/fonts/Motiva/` or change the `@font-face` rules in `src/pdf/templates/cv.css`.
-- The LinkedIn fetch (`src/test_api.py`) depends on API scopes LinkedIn may not grant to new apps.
+- The Motiva Sans font used by the default `cv.css` is commercial and not included; without it the PDF falls back to a generic sans-serif. Add your own files under `assets/fonts/Motiva/` or edit the `@font-face` rules in `src/limd/pdf/templates/cv.css`.
+- The LinkedIn export and PDF parsers are tolerant but based on third-party descriptions of the formats.

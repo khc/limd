@@ -19,7 +19,11 @@ wheels/
 .obsidian/
 .claude/
 
-# Personal career data (CV, LinkedIn, interview prep, job applications)
+# Personal data (new layout)
+/profile/
+/applications/
+
+# Legacy personal data locations (remove after the layout migration is confirmed)
 /career.md
 /agents.md
 /cv/
@@ -42,3 +46,13 @@ wheels/
 
 # Fonts: Motiva is a licensed commercial font; the rest are re-fetched by `task pdf:fonts`
 /assets/fonts/
+
+
+# Local review store
+.sidecar/
+
+# Local planning artifacts
+.plans/
+
+# Local backup made by the layout migration
+/.backup-*/

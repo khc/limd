@@ -1,49 +1,30 @@
 version: "3"
 
-tasks:
-  profile:
-    desc: "Fetch LinkedIn profile info and save as JSON using uv run"
-    cmds:
-      - uv run python src/test_api.py {{.CLI_ARGS}}
+env:
+  DYLD_FALLBACK_LIBRARY_PATH: /opt/homebrew/lib
 
+tasks:
   install:
-    desc: "Install project dependencies using uv sync"
+    desc: "Install project dependencies"
     cmds:
       - uv sync
 
-  convert:md:
-    desc: "Convert PDF(s) to Markdown using uv run"
+  test:
+    desc: "Run the test suite"
     cmds:
-      - uv run python src/convert/pdf_to_md.py {{.CLI_ARGS}}
+      - uv run python -m unittest discover tests
+
+  limd:
+    desc: "Run the limd CLI, e.g. task limd -- cv build --input profile/cv.md"
+    cmds:
+      - uv run limd {{.CLI_ARGS}}
 
   pdf:cv:
-    desc: "Generate CV PDF from Markdown"
-    env:
-      DYLD_FALLBACK_LIBRARY_PATH: /opt/homebrew/lib
+    desc: "Render a Markdown CV to PDF (input=<path>)"
     cmds:
-      - uv run python src/pdf/pdf_build.py {{if .input}}--input {{.input}}{{end}} {{.CLI_ARGS}}
+      - uv run limd cv build --input {{.input}}
 
   pdf:fonts:
     desc: "Download fonts for PDF generation"
     cmds:
-      - uv run python src/pdf/pdf_fonts.py
-
-  pdf:pandoc:
-    desc: "Convert Markdown to PDF using Pandoc"
-    cmds:
-      - pandoc --to pdf {{.input}} -o {{.output}} --pdf-engine=weasyprint --css=src/pdf/styles/prolab.css
-
-  cv:generate:
-    desc: "Generate a job-specific CV from generic sources using Codex CLI"
-    cmds:
-      - bash scripts/gen_cv.sh {{.CLI_ARGS}}
-
-  cv:match:
-    desc: "Compare CV with job description and generate a match report using Gemini or Codex"
-    cmds:
-      - bash scripts/match_cv.sh {{.CLI_ARGS}}
-
-  llm:compact:
-    desc: "Compact a Markdown file using local LMStudio API"
-    cmds:
-      - uv run python src/llm/llm_compact.py {{.CLI_ARGS}}
+      - uv run limd fonts
