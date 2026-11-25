@@ -1,0 +1,22 @@
+[project]
+name = "limd"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "requests",
+    "python-dotenv",
+    "convert",
+    "pdf-service",
+    "llm-tools",
+    "docling>=2.91.0",
+]
+
+[tool.uv]
+workspace = { members = ["src/convert", "src/pdf", "src/llm"] }
+
+[tool.uv.sources]
+convert = { workspace = true }
+pdf-service = { workspace = true }
+llm-tools = { workspace = true }

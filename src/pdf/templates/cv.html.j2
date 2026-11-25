@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="{{ lang | default('en') }}">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title | default('CV') }}</title>
+    <link rel="stylesheet" href="cv.css">
+</head>
+<body class="cv-template">
+    <div class="container">
+        <aside class="sidebar">
+            {% if photo_path %}
+            <div class="profile-photo">
+                <img src="{{ photo_path }}" alt="Profile Photo">
+            </div>
+            {% endif %}
+            <div class="contact-info">
+                {% if meta.phone %}<div class="contact-item"><span class="phone-value">{{ meta.phone }}</span></div>{% endif %}
+                {% if meta.email %}<div class="contact-item"><span class="email-value">{{ meta.email }}</span></div>{% endif %}
+                {% if meta.linkedin %}<div class="contact-item"><span>{{ meta.linkedin }}</span></div>{% endif %}
+                {% if meta.website %}<div class="contact-item"><span>{{ meta.website }}</span></div>{% endif %}
+                {% if meta.github %}<div class="contact-item"><span>{{ meta.github }}</span></div>{% endif %}
+                {% if meta.location %}<div class="contact-item"><span>{{ meta.location }}</span></div>{% endif %}
+            </div>
+            
+            {% if meta.sidebar_body %}
+                <div class="sidebar-body">
+                    {{ meta.sidebar_body }}
+                </div>
+            {% endif %}
+        </aside>
+
+        <main class="main-content">
+            {{ body }}
+        </main>
+    </div>
+
+    {% if meta.footer %}
+    <div class="footer">
+        {{ meta.footer }}
+    </div>
+    {% endif %}
+</body>
+</html>

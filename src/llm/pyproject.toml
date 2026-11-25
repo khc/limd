@@ -1,0 +1,9 @@
+[project]
+name = "llm-tools"
+version = "0.1.0"
+description = "LLM utilities using LMStudio and Qwen"
+dependencies = [
+    "openai",
+    "markdown-it-py",
+]
+requires-python = ">=3.12"
