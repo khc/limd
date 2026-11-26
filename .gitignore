@@ -17,7 +17,8 @@ wheels/
 # OS / editor
 .DS_Store
 .obsidian/
-.claude/
+.claude/*
+!.claude/skills/
 
 # Personal data (new layout)
 /profile/
