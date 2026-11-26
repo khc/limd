@@ -31,6 +31,49 @@ uv run limd --root examples tailor acme --backend claude       # -> examples/app
 uv run limd --root examples match acme --backend claude        # -> examples/applications/acme/match.md
 ```
 
+## Workflow
+
+### 1. Create your master CV
+
+```bash
+mkdir -p profile
+cp examples/profile/cv.md profile/cv.md          # start from the sample, then replace it with your own content
+cp ~/Pictures/me.png profile/photo.png           # optional square photo for the sidebar
+uv run limd cv build --input profile/cv.md       # -> dist/pdf/cv.pdf
+```
+
+On macOS, if the build fails with `cannot load library 'libgobject-2.0-0'`, run `brew install pango` and prefix the command with `DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib` (or run it through `task limd -- cv build --input profile/cv.md`).
+
+Edit `profile/cv.md`, rebuild and open `dist/pdf/cv.pdf`; repeat until it looks right. The template is A4 and works best at one or two pages. If you have a LinkedIn profile, import it first (see [LinkedIn import](#linkedin-import)) and copy what you need from `profile/linkedin.md` into the CV. The `pdf-analyse` skill in step 3 can check the layout for you.
+
+### 2. Write your LinkedIn profile
+
+`profile/linkedin.md` is plain Markdown you copy section by section into LinkedIn (`## Headline`, `## About`, `## Experience`, ...). It should tell the same story as the CV in a more conversational voice, with the same dates, titles and claims. See `examples/profile/linkedin.md`. `limd` never writes to LinkedIn; you paste the text yourself.
+
+### 3. Tweak with the analysis skills
+
+The repo ships three [Claude Code skills](https://docs.claude.com/en/docs/claude-code/skills) in `.claude/skills/`. Open Claude Code in this repo and ask in plain language:
+
+| Skill | Ask for | What it does |
+|---|---|---|
+| `cv-analyse` | "analyse my CV" | Ranked fixes for `profile/cv.md` (or a tailored CV) against your `rules.md`, `strategy.md` and benchmarks |
+| `li-analyse` | "analyse my LinkedIn profile" | Headline, About, keywords and visibility advice, and consistency with the CV |
+| `pdf-analyse` | "check the PDF" | Layout checks (broken words, page breaks, dangling lines, overflow) plus page images and an ATS reading-order check |
+
+Add benchmark profiles with `limd import pdf` and a `profile/reference-cv.md` for the skills to compare against. The skills report first and only edit when you agree. They may search the web for current best practice, with generic queries that never include your details. Everything they read is sent to the model you are using, so read [Privacy](#privacy).
+
+### 4. Tailor for a job
+
+```bash
+mkdir -p applications/acme
+# save the job description as applications/acme/job.md
+uv run limd tailor acme --backend claude         # -> applications/acme/cv.md + report.md
+uv run limd match acme --backend claude          # -> applications/acme/match.md (score vs the job)
+uv run limd cv build --input applications/acme/cv.md     # -> dist/acme/cv.pdf
+```
+
+Read `report.md` and edit `applications/acme/cv.md` before you send it; the model's output is a draft. Run `pdf-analyse` on the result to check the layout.
+
 ## Your data
 
 ```
@@ -52,10 +95,13 @@ dist/                     PDFs (dist/<company>/ for files inside applications/<c
 
 ```markdown
 ---
+phone: "+00 000 000 000"           # all fields are optional
 email: you@example.com
 linkedin: www.linkedin.com/in/you
+website: www.example.com
+github: github.com/you
 location: City, Country
-photo: profile/photo.png   # optional
+photo: profile/photo.png           # defaults to profile/photo.png
 ---
 
 # Your Name
@@ -66,7 +112,7 @@ Headline | Specialty
 
 ### Employer
 #### Role title
-Jan 2020 – Present {#period}
+Jan 2020 - Present {#period}
 City, Country {#place}
 
 - Bullet
@@ -74,7 +120,7 @@ City, Country {#place}
 ## Education {#sidebar}
 ```
 
-`{#period}` moves the date into the employer heading, `{#place}` lines are dropped from the PDF, and `{#sidebar}` sections render in the left column. See `examples/profile/cv.md`.
+`{#period}` moves the date into the employer heading, `{#place}` lines are dropped from the PDF, and `{#sidebar}` sections render in the left column. See `examples/profile/cv.md` for a complete one-page CV.
 
 ## LinkedIn import
 
@@ -110,7 +156,7 @@ The export holds far more than your profile (connections, messages, email addres
 | `limd convert --input <pdf>` | Convert PDF(s) to Markdown |
 | `limd fonts` | Download the PDF fonts |
 
-Use `--root <dir>` (or `LIMD_ROOT`) to point `limd` at a different data folder.
+Use `--root <dir>` (or `LIMD_ROOT`) to point `limd` at a different data folder. With the Taskfile: `task limd -- --root examples cv build --input profile/cv.md`.
 
 ## Privacy
 
