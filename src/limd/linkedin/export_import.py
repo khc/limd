@@ -7,6 +7,7 @@ import json
 import re
 import sys
 import zipfile
+import zlib
 from pathlib import Path, PurePosixPath
 from typing import Any
 
@@ -125,8 +126,8 @@ def import_export(zip_path: Path | str, out_dir: Path | str = PROFILE_DIR, force
     for path in (json_path, md_path):
         if path.exists() and not force:
             raise FileExistsError(f"{path} already exists; use --force to overwrite")
-    write_text(json_path, json.dumps(profile, indent=2, ensure_ascii=False) + "\n", force=True)
-    write_text(md_path, render_markdown(profile), force=True)
+    write_text(json_path, json.dumps(profile, indent=2, ensure_ascii=False) + "\n", force=force)
+    write_text(md_path, render_markdown(profile), force=force)
     return json_path, md_path
 
 
@@ -139,5 +140,6 @@ def main(argv: list[str] | None = None) -> None:
     try:
         for path in import_export(args.zip, args.out, args.force):
             print(f"Wrote {path}")
-    except (ValueError, FileExistsError, zipfile.BadZipFile, OSError) as error:
+    except (ValueError, FileExistsError, zipfile.BadZipFile, OSError, csv.Error, zlib.error, EOFError,
+            NotImplementedError, RuntimeError) as error:
         sys.exit(f"Error: {error}")

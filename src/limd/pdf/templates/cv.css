@@ -1,29 +1,15 @@
 @font-face {
-    font-family: "Motiva Sans";
+    font-family: "Figtree";
     font-style: normal;
-    font-weight: 300;
-    src: url("../../../../assets/fonts/Motiva/Plau - MotivaSans-Light.otf") format("opentype");
+    font-weight: 300 900;
+    src: url("../../../../assets/fonts/Figtree/Figtree-VariableFont_wght.ttf") format("truetype");
 }
 
 @font-face {
-    font-family: "Motiva Sans";
-    font-style: normal;
-    font-weight: 400;
-    src: url("../../../../assets/fonts/Motiva/Plau - MotivaSans-Regular.otf") format("opentype");
-}
-
-@font-face {
-    font-family: "Motiva Sans";
-    font-style: normal;
-    font-weight: 700;
-    src: url("../../../../assets/fonts/Motiva/Plau - MotivaSans-Bold.otf") format("opentype");
-}
-
-@font-face {
-    font-family: "Motiva Sans";
-    font-style: normal;
-    font-weight: 800;
-    src: url("../../../../assets/fonts/Motiva/Plau - MotivaSans-ExtraBold.otf") format("opentype");
+    font-family: "Figtree";
+    font-style: italic;
+    font-weight: 300 900;
+    src: url("../../../../assets/fonts/Figtree/Figtree-Italic-VariableFont_wght.ttf") format("truetype");
 }
 
 @font-face {
@@ -39,10 +25,10 @@
 }
 
 body {
-    font-family: "Motiva Sans", sans-serif;
-    font-weight: 300; /* Motiva Light */
+    font-family: "Figtree", sans-serif;
+    font-weight: 400;
     font-size: 9pt;
-    line-height: 1.3;
+    line-height: 1.35;
     color: #000000;
     margin: 0;
     padding: 0;
@@ -83,7 +69,7 @@ body {
 }
 
 .contact-item span {
-    word-break: break-all;
+    overflow-wrap: anywhere;
 }
 
 .contact-item .phone-value {
@@ -93,7 +79,7 @@ body {
 
 .contact-item .email-value {
     font-weight: 700;
-    font-size: 9pt;
+    font-size: 8.5pt;
 }
 
 .sidebar-body h2 {
@@ -107,11 +93,11 @@ body {
 }
 
 .sidebar-body p, .sidebar-body ul, .sidebar-body li {
-    font-family: "Motiva Sans", sans-serif;
-    font-weight: 300;
+    font-family: "Figtree", sans-serif;
+    font-weight: 400;
     font-size: 9pt;
     color: #000000;
-    line-height: 1.3;
+    line-height: 1.35;
     margin: 0;
     padding: 0;
 }
@@ -142,8 +128,8 @@ body {
 }
 
 .period, .place {
-    font-family: "Motiva Sans", sans-serif;
-    font-weight: 300; /* Motiva Light */
+    font-family: "Figtree", sans-serif;
+    font-weight: 400;
     text-transform: none;
     color: #000000;
 }
@@ -151,7 +137,7 @@ body {
 .main-content h1 .period, .main-content h1 .place,
 .main-content h2 .period, .main-content h2 .place,
 .main-content h4 .period, .main-content h4 .place {
-    font-size: 11pt;
+    font-size: 10pt;
 }
 
 .main-content h3 .period, .main-content h3 .place {
@@ -159,7 +145,7 @@ body {
 }
 
 .main-content h1 {
-    font-family: "Motiva Sans", sans-serif;
+    font-family: "Figtree", sans-serif;
     font-weight: 800;
     font-size: 20pt;
     color: #000000;
@@ -176,18 +162,18 @@ body {
 }
 
 .main-content h3 {
-    font-family: "Motiva Sans", sans-serif;
+    font-family: "Figtree", sans-serif;
     font-weight: 700;
-    font-size: 11pt;
+    font-size: 10pt;
     color: #1D1593;
     text-transform: uppercase;
     margin-bottom: -0.2cm;
 }
 
 .main-content h4 {
-    font-family: "Motiva Sans", sans-serif;
+    font-family: "Figtree", sans-serif;
     font-weight: 700;
-    font-size: 11pt;
+    font-size: 10pt;
     color: #000000;
     margin-top: 0.2cm;
     margin-bottom: 0.2cm;
@@ -195,7 +181,7 @@ body {
 
 .main-content p {
     font-size: 9pt;
-    font-weight: 300;
+    font-weight: 400;
     color: #000000;
     margin: 0;
     padding: 0;
@@ -204,7 +190,7 @@ body {
 }
 .main-content ul, .main-content li {
     font-size: 9pt;
-    font-weight: 300;
+    font-weight: 400;
     color: #000000;
     margin: 0;
     padding: 0;

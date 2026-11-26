@@ -31,6 +31,14 @@ FONTS = {
         "playfairdisplay/PlayfairDisplay-Italic%5Bwght%5D.ttf",
         "a5e26dc5e2e77fb2803a0bf02fd4f81ee136ec8dea863ccdb0c59a263b21378b",
     ),
+    "Figtree/Figtree-VariableFont_wght.ttf": (
+        "figtree/Figtree%5Bwght%5D.ttf",
+        "26ad3db9b31ff7dde67a91ff515d022d2f495cd506590699cf264f0bfe6fb714",
+    ),
+    "Figtree/Figtree-Italic-VariableFont_wght.ttf": (
+        "figtree/Figtree-Italic%5Bwght%5D.ttf",
+        "94dec1f18b9275d69e8b4a91b6514bdc18199048347e1c36e1285b11b0b87653",
+    ),
     "Outfit/static/Outfit-ExtraBold.ttf": (
         "outfit/Outfit%5Bwght%5D.ttf",
         "fc7287273e66929776e2ba54f144fe699080bec29f61bf649d70d871468aeade",

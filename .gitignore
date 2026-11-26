@@ -44,7 +44,7 @@ wheels/
 *.pdf
 *.docx
 
-# Fonts: Motiva is a licensed commercial font; the rest are re-fetched by `task pdf:fonts`
+# Fonts: re-fetched by `task pdf:fonts`
 /assets/fonts/
 
 
@@ -56,3 +56,8 @@ wheels/
 
 # Local backup made by the layout migration
 /.backup-*/
+
+# LinkedIn data exports (connections, messages, emails) and other raw data
+*.zip
+*.csv
+Basic_LinkedInDataExport*/

@@ -10,6 +10,7 @@ from limd.llm.llm_match import format_match, match_with_llm
 from limd.paths import APPLICATIONS_DIR, PROFILE_DIR, PROMPTS_DIR
 
 REPORT_MARKER = "<<<REPORT>>>"
+REVIEW_NOTE = "Review cv.md before building or sending it: it is model output based on an untrusted job description."
 OPTIONAL_PROFILE_FILES = (
     ("Rules", "rules.md"),
     ("LinkedIn profile", "linkedin.md"),
@@ -59,8 +60,8 @@ def tailor(company: str, backend: Backend, force: bool = False, profile_dir: Pat
     system = _read(PROMPTS_DIR / "tailor.md")
     response = backend.complete(system, build_tailor_input(profile_dir, _read(_job_path(app_dir))))
     cv_text, _, report = response.partition(REPORT_MARKER)
-    write_text(cv_path, cv_text.strip() + "\n", force=True)
-    write_text(report_path, (report.strip() or "The model did not return a report.") + "\n", force=True)
+    write_text(cv_path, cv_text.strip() + "\n", force=force)
+    write_text(report_path, (report.strip() or "The model did not return a report.") + "\n", force=force)
     return cv_path, report_path
 
 
@@ -74,7 +75,7 @@ def match(company: str, backend: Backend, force: bool = False,
     return write_text(app_dir / "match.md", format_match(company, response), force=force)
 
 
-def _run(prog: str, action, argv: list[str] | None) -> None:
+def _run(prog: str, action, argv: list[str] | None, note: str | None = None) -> None:
     parser = argparse.ArgumentParser(prog=prog)
     parser.add_argument("company", help="Folder name under applications/")
     parser.add_argument("--backend", default="claude", help="claude, codex or gemini")
@@ -84,12 +85,14 @@ def _run(prog: str, action, argv: list[str] | None) -> None:
     try:
         for path in action(args.company, get_backend(args.backend, args.model), args.force):
             print(f"Wrote {path}")
+        if note:
+            print(note)
     except (BackendError, FileNotFoundError, FileExistsError, ValueError) as error:
         sys.exit(f"Error: {error}")
 
 
 def main_tailor(argv: list[str] | None = None) -> None:
-    _run("limd tailor", lambda c, b, f: tailor(c, b, f), argv)
+    _run("limd tailor", lambda c, b, f: tailor(c, b, f), argv, REVIEW_NOTE)
 
 
 def main_match(argv: list[str] | None = None) -> None:

@@ -58,8 +58,8 @@ def import_pdf(pdf_path: Path | str, name: str, out_dir: Path | str, force: bool
         if path.exists() and not force:
             raise FileExistsError(f"{path} already exists; use --force to overwrite")
     sections = parse_profile_markdown(convert_with_pymupdf(Path(pdf_path)))
-    write_text(md_path, render_markdown(slug, sections), force=True)
-    write_text(json_path, json.dumps(sections, indent=2, ensure_ascii=False) + "\n", force=True)
+    write_text(md_path, render_markdown(slug, sections), force=force)
+    write_text(json_path, json.dumps(sections, indent=2, ensure_ascii=False) + "\n", force=force)
     return md_path, json_path
 
 

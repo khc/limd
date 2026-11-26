@@ -4,6 +4,7 @@ import argparse
 import sys
 from pathlib import Path
 
+from limd.files import write_text
 from limd.llm.backends import Backend, BackendError, get_backend
 from limd.llm.markdown_text import strip_markdown
 from limd.paths import PROMPTS_DIR
@@ -19,6 +20,7 @@ def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(prog="limd compact", description=__doc__)
     parser.add_argument("--input", required=True, help="Path to the input Markdown file")
     parser.add_argument("--output", help="Path to save the output (prints to stdout if not provided)")
+    parser.add_argument("--force", action="store_true", help="Overwrite an existing output file")
     parser.add_argument("--backend", default="claude", help="claude, codex or gemini")
     parser.add_argument("--model", help="Model name passed to the backend")
     args = parser.parse_args(argv)
@@ -33,7 +35,10 @@ def main(argv: list[str] | None = None) -> None:
         sys.exit(f"Error: {error}")
 
     if args.output:
-        Path(args.output).write_text(output, encoding="utf-8")
+        try:
+            write_text(args.output, output, force=args.force)
+        except FileExistsError as error:
+            sys.exit(f"Error: {error}")
         print(f"Output saved to {args.output}", file=sys.stderr)
     else:
         print(output)

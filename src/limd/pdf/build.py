@@ -132,7 +132,7 @@ def preprocess_markdown(text: str) -> str:
     # Move period into header with a dash
     text = re.sub(
         r'(###+ .+)\n+(.+)\s+\{#period\}',
-        r'\1 <span class="period"> — \2</span>',
+        r'\1 <span class="period"> – \2</span>',
         text
     )
     # Remove lines with {#place}

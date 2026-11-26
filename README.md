@@ -18,7 +18,7 @@ Your personal data stays in two git-ignored folders, `profile/` and `application
 
 ```bash
 uv sync
-uv run limd fonts      # download the open-licensed fonts (Inter, Playfair Display, Outfit)
+uv run limd fonts      # download the open-licensed fonts (Inter, Playfair Display, Outfit, Figtree)
 ```
 
 On macOS, WeasyPrint needs `DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/lib`; the Taskfile sets it for you (`task test`, `task limd -- ...`).
@@ -83,7 +83,7 @@ LinkedIn offers no public API for reading profiles, and automating the site brea
 - **Your own profile:** LinkedIn → Settings → Data privacy → *Get a copy of your data*, select the profile data, download the ZIP, then:
 
   ```bash
-  uv run limd import linkedin-export Basic_LinkedInDataExport.zip     # -> profile/linkedin.json + linkedin.md
+  uv run limd import linkedin-export ~/Downloads/Basic_LinkedInDataExport.zip     # -> profile/linkedin.json + linkedin.md
   ```
 
   The importer reads `Profile.csv`, `Positions.csv`, `Education.csv` and `Skills.csv` from anywhere in the ZIP and skips any that are missing. LinkedIn does not document the file layout, so if your archive looks different, please open an issue.
@@ -94,6 +94,8 @@ LinkedIn offers no public API for reading profiles, and automating the site brea
   ```
 
 Existing output is never overwritten unless you pass `--force`.
+
+The export holds far more than your profile (connections, messages, email addresses). Keep the ZIP outside the repo or in `profile/`; `*.zip` and `*.csv` are git-ignored as a safety net.
 
 ## Commands
 
@@ -110,6 +112,10 @@ Existing output is never overwritten unless you pass `--force`.
 
 Use `--root <dir>` (or `LIMD_ROOT`) to point `limd` at a different data folder.
 
+## Privacy
+
+`limd tailor`, `match` and `compact` send your CV, profile text, rules and the job description to the tool behind the backend you choose (`claude`, `codex` or `gemini`), under that provider's terms. Pick the backend accordingly. Job descriptions are untrusted text, so the backends run from an empty temporary directory with tools disabled where the CLI allows it, but you should still read `cv.md` and `report.md` before building or sending them.
+
 ## Backends
 
 `--backend claude` (default), `codex` or `gemini`. Each takes a prompt and returns text; `src/limd/llm/backends.py` is about 60 lines if you want to add another.
@@ -124,5 +130,5 @@ PDF rendering only loads fonts from `assets/fonts/`, images from `profile/`, and
 
 ## Known limitations
 
-- The Motiva Sans font used by the default `cv.css` is commercial and not included; without it the PDF falls back to a generic sans-serif. Add your own files under `assets/fonts/Motiva/` or edit the `@font-face` rules in `src/limd/pdf/templates/cv.css`.
+- The default `cv.css` uses Figtree (open license, fetched by `limd fonts`). To use another font, edit the `@font-face` rules in `src/limd/pdf/templates/cv.css` and add the files under `assets/fonts/`.
 - The LinkedIn export and PDF parsers are tolerant but based on third-party descriptions of the formats.

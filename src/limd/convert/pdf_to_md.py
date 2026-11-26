@@ -4,6 +4,8 @@ import glob
 import re
 from pathlib import Path
 
+from limd.files import write_text
+
 def convert_with_pymupdf(pdf_path: Path) -> str:
     try:
         import pymupdf4llm
@@ -52,7 +54,7 @@ def convert_pdf_to_md(pdf_path: Path, output_path: Path = None, engine: str = "p
     else:
         raise ValueError(f"Unknown engine: {engine}")
     
-    output_path.write_text(md_text, encoding="utf-8")
+    write_text(output_path, md_text, force=True)  # existence was checked above
     return output_path
 
 def main(argv: list[str] | None = None) -> None:

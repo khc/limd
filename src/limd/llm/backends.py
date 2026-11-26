@@ -17,12 +17,18 @@ class Backend(Protocol):
 
 
 def _run(argv: list[str], prompt: str | None) -> str:
+    """Run a CLI from an empty temp directory so an agent cannot wander into the user's files."""
     try:
-        result = subprocess.run(argv, input=prompt, capture_output=True, text=True, timeout=TIMEOUT_SECONDS)
+        with tempfile.TemporaryDirectory() as cwd:
+            result = subprocess.run(
+                argv, input=prompt, capture_output=True, text=True, timeout=TIMEOUT_SECONDS, cwd=cwd
+            )
     except FileNotFoundError as error:
         raise BackendError(f"{argv[0]} is not installed or not on PATH") from error
     except subprocess.TimeoutExpired as error:
         raise BackendError(f"{argv[0]} timed out after {TIMEOUT_SECONDS}s") from error
+    except OSError as error:
+        raise BackendError(f"could not run {argv[0]}: {error}") from error
     if result.returncode != 0:
         raise BackendError(f"{argv[0]} failed ({result.returncode}): {result.stderr.strip()[-500:]}")
     return result.stdout
@@ -35,7 +41,7 @@ class CodexBackend:
     def complete(self, system: str, user: str, max_tokens: int | None = None) -> str:
         with tempfile.TemporaryDirectory() as tmp:
             out = Path(tmp) / "last-message.txt"
-            argv = ["codex", "exec", "--skip-git-repo-check", "--sandbox", "read-only", "--color", "never", "-o", str(out)]
+            argv = ["codex", "exec", "--skip-git-repo-check", "--ephemeral", "--sandbox", "read-only", "--color", "never", "-o", str(out)]
             if self.model:
                 argv += ["-m", self.model]
             _run(argv + ["-"], f"{system}\n\n---\n\n{user}")
@@ -49,10 +55,10 @@ class GeminiBackend:
         self.model = model
 
     def complete(self, system: str, user: str, max_tokens: int | None = None) -> str:
-        argv = ["gemini", "-p", f"{system}\n\n---\n\n{user}"]
+        argv = ["gemini", "-p", "Follow the instructions in the input."]
         if self.model:
             argv += ["-m", self.model]
-        return _run(argv, None).strip()
+        return _run(argv, f"{system}\n\n---\n\n{user}").strip()
 
 
 class ClaudeBackend:
@@ -60,7 +66,7 @@ class ClaudeBackend:
         self.model = model
 
     def complete(self, system: str, user: str, max_tokens: int | None = None) -> str:
-        argv = ["claude", "-p", "--no-session-persistence", "--system-prompt", system]
+        argv = ["claude", "-p", "--no-session-persistence", "--tools", "", "--system-prompt", system]
         if self.model:
             argv += ["--model", self.model]
         return _run(argv, user).strip()
